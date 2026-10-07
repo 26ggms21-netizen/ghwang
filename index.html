@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="cupcake">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>광해군 사료 탐험</title>
+<!-- 인터넷이 될 때만 불러오는 꾸미기용 파일 (없어도 아래 기본 CSS로 모두 작동) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*{box-sizing:border-box}
+:root{--pink:#ff8fb1;--pink2:#ffe3ec;--sky:#6ec6f0;--sky2:#dff3fd;--ink:#3b3350;--mint:#5ccfa4;--warn:#ffb347}
+html{font-size:18px}
+body{margin:0;font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:18px;line-height:1.6;color:var(--ink);background:linear-gradient(160deg,#fff0f5,#e6f6ff);min-height:100vh;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:560px;margin:0 auto;padding:12px}
+header{background:#fff;border-radius:24px;padding:12px 14px;box-shadow:0 4px 0 var(--pink2);margin-bottom:12px}
+h1{font-size:1.2rem;margin:0 0 8px;display:flex;align-items:center;gap:8px;color:#e0527f}
+.bar{height:16px;background:var(--sky2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--sky));border-radius:99px;transition:width .3s}
+.pinfo{display:flex;justify-content:space-between;gap:8px;font-size:1rem;margin-top:4px;flex-wrap:wrap}
+.box{background:#fff;border-radius:24px;padding:16px;box-shadow:0 4px 0 var(--sky2);margin-bottom:12px}
+h2{font-size:1.15rem;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+svg{flex:none;vertical-align:middle}
+.b{min-height:46px;padding:8px 16px;border:0;border-radius:99px;font:inherit;font-weight:700;color:#fff;background:var(--sky);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 3px 0 rgba(0,0,0,.12);max-width:100%}
+.b:active{transform:translateY(2px);box-shadow:none}
+.b.pk{background:var(--pink)}.b.gn{background:var(--mint)}.b.gy{background:#fff;color:var(--ink);border:2px solid var(--sky2)}
+.b[disabled]{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.row>.b{flex:1 1 130px}
+.card{cursor:pointer;border:3px dashed var(--pink);background:#fff9fb;border-radius:24px;padding:16px;min-height:230px;position:relative}
+.card .em{font-size:2.6rem;line-height:1.2}
+.tag{display:inline-block;background:var(--pink2);color:#d03a6b;border-radius:99px;padding:0 12px;font-size:1rem;font-weight:700}
+.badge{position:absolute;top:10px;right:10px;border-radius:99px;padding:0 10px;font-size:1rem;font-weight:700;color:#fff}
+.badge.ok{background:var(--mint)}.badge.more{background:var(--warn)}
+.hint{color:#8a7fa3;font-size:1rem}
+ul{padding-left:1.2em;margin:6px 0}li{margin:4px 0}
+.gist{background:var(--sky2);border-radius:14px;padding:8px 12px;margin-top:8px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.nav .b{flex:0 0 auto}
+.opt{width:100%;margin:6px 0;text-align:left;justify-content:flex-start;background:#fff;color:var(--ink);border:2px solid var(--sky2);font-weight:600}
+.opt.good{background:#d8f6e9;border-color:var(--mint)}.opt.bad{background:#ffe0e0;border-color:#ff7d7d}
+.fb{border-radius:16px;padding:10px 12px;margin-top:8px;background:#fff7e0}
+.chip{min-height:44px;padding:4px 12px;border-radius:99px;border:2px solid var(--sky);background:#fff;color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+.chip.on{background:var(--sky);color:#fff}
+.pick{flex:1 1 140px;min-height:64px;border-radius:18px;border:3px solid var(--pink2);background:#fff;font:inherit;color:var(--ink);cursor:pointer;padding:6px 8px;text-align:center}
+.pick.on{border-color:var(--pink);background:var(--pink2);font-weight:700}
+.big{font-size:2.2rem;font-weight:800;color:#e0527f;text-align:center;letter-spacing:4px}
+.sc{font-size:3rem;font-weight:800;text-align:center;color:var(--pink)}
+.axis{border-top:2px dotted var(--pink2);padding-top:10px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="ttl"></h1>
+    <div class="bar"><i id="pb" style="width:0"></i></div>
+    <div class="pinfo"><span id="pt"></span><span id="pt2"></span></div>
+  </header>
+  <main id="app"></main>
+</div>
+<script>
+/* 아이콘 (Lucide 모양을 직접 넣어 인터넷 없이도 보입니다) */
+const P={
+ left:'<path d="m15 18-6-6 6-6"/>',right:'<path d="m9 18 6-6-6-6"/>',
+ shuffle:'<path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/><path d="m18 14 4 4-4 4"/>',
+ check:'<path d="M20 6 9 17l-5-5"/>',x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+ eye:'<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+ redo:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+ book:'<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+ star:'<path d="m12 3 1.9 5.8H20l-5 3.6 1.9 5.8-4.9-3.6-4.9 3.6L9 12.4 4 8.8h6.1z"/>',
+ help:'<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>'};
+const ic=(n,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${P[n]}</svg>`;
+const sh=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
+const $=id=>document.getElementById(id);
+ 
+/* 사료 5개 (첨부 파일 내용만 사용) */
+const S=[
+{e:'🛡️',t:'임진왜란 이후 방어책을 찾다',gist:'호패법과 화기도감으로 나라를 지킬 준비를 했어요.',
+ pts:['남쪽 일본의 다시 침략할 걱정, 북쪽 후금의 빠른 성장 때문에 양쪽 국방이 급했어요.','호패법을 시행해 나라의 인구와 군대에 갈 수 있는 사람을 정확히 알아내려 했어요.','화기도감을 세워 조총과 화포(파진포) 같은 무기를 많이 만들었어요.','국경 지역의 읍성과 산성을 새로 쌓거나 고쳐 쌓았어요.']},
+{e:'💊',t:'동의보감을 간행하다',gist:'허준이 쓴 책을 널리 퍼뜨려 백성의 병 치료를 도왔어요.',
+ pts:['선조 때 시작한 의학책 만들기는 정유재란으로 멈췄어요.','광해군은 허준에게 왕실 책을 내주며 계속 쓰도록 격려했어요.','허준은 광해군 2년(1610년)에 모두 25권의 「동의보감」을 완성했어요.','광해군은 출판청을 열어 전국에 책을 널리 나눠 주게 했고, 백성들이 우리나라 약초로 병을 쉽게 치료할 수 있었어요.']},
+{e:'🌾',t:'대동법을 시행하다',gist:'특산물 대신 땅 크기에 따라 쌀을 내게 해 가난한 농민의 짐을 덜었어요.',
+ pts:['예전에는 지역 특산물을 나라에 바치는 공납이 있었어요.','방납의 폐단: 중간 업자와 관리가 짜고, 구하기 힘든 물건을 정해 놓고 터무니없이 비싼 값을 받았어요.','광해군은 즉위년(1608년)에 이원익의 건의를 받아들였어요.','집집마다 거두던 공물 대신, 토지 결수(땅의 크기)를 기준으로 쌀을 거두는 대동법(선혜법)을 경기도에서 처음 시행했어요.','땅이 없거나 적은 가난한 농민의 부담이 크게 줄었어요.','공인(나라가 정한 구매 대행 상인)이 나타나고, 상품 화폐 경제(돈과 시장 중심 거래)가 발전하는 계기가 되었어요.']},
+{e:'🧭',t:'중립 외교를 실시하다',gist:'명과 후금 사이에서 전쟁을 피하려고 상황을 보며 움직였어요.',
+ pts:['명나라가 후금을 치려고 구원병을 보내라고 하자, 광해군은 전쟁으로 약해진 나라 힘과 서투른 군사를 이유로 경솔한 출병을 피하려 했어요.','의주 등 국경에 진을 쳐 군사력을 보여 주며 돌아가는 분위기(정세)를 지켜보았어요.','어쩔 수 없이 강홍립을 도원수로 삼아 군사를 보냈지만, 현장 상황에 따라 유연하게 대처하라는 밀지(비밀 명령)를 내렸어요.','후금과 비밀 교섭도 이어 가며 국경 충돌을 막으려 했어요.']},
+{e:'👑',t:'광해군의 폐위와 인조반정',gist:'왕권을 지키려다 비판을 받았고, 결국 1623년 왕에서 쫓겨났어요.',
+ pts:['불안한 왕권을 강화하려고 영창대군과 임해군(친형) 등 친인척을 제거했어요.','새어머니 인목대비를 서쪽 궁궐(지금의 덕수궁)에 가두었어요. 이를 ‘폐모살제’라고 해요.','궁궐 공사를 자주 일으켜 백성의 일 부담이 늘었다는 비판을 받았어요.','명나라에 대한 성리학적 의리를 버리고 오랑캐인 후금과 손잡았다는 비판도 받았어요.','1623년 성리학적 명분을 내세운 서인 세력이 인조를 새 왕으로 세워 광해군을 쫓아냈어요. 이것이 인조반정이에요.']}];
+ 
+/* 광해군 MBTI 활동지 */
+const M=[
+{k:'EI',a:['E','외향형','사람들과 함께, 적극적으로 움직여요'],b:['I','내향형','혼자 조용히, 신중하게 생각해요']},
+{k:'NS',a:['N','직관형','앞날과 큰 그림을 보고 움직여요'],b:['S','현실형','눈앞의 사실과 상황을 중요하게 봐요']},
+{k:'TF',a:['T','사고형','이성과 능력을 보고 판단해요'],b:['F','감정형','마음과 인성, 관계를 보고 판단해요']},
+{k:'JP',a:['J','계획형','미리 계획하고 규칙을 따라요'],b:['P','탐색형','상황에 맞게 자유롭게 바꿔요']}];
+const MT={EI:'에너지 방향 (E / I)',NS:'세상을 보는 눈 (N / S)',TF:'판단 방법 (T / F)',JP:'생활 방식 (J / P)'};
+ 
+/* 퀴즈 6문항 (첫 번째 보기가 정답, 화면에서는 섞음) */
+const Q=[
+{q:'광해군이 나라의 인구와 군대에 갈 사람을 정확히 알려고 시행한 제도는?',o:['호패법','대동법','화기도감','인조반정'],e:'호패법으로 인구와 군대에 복무할 사람을 정확히 파악해 군사 손실을 막으려 했어요. (사료 1)'},
+{q:'광해군 2년(1610년)에 「동의보감」을 완성해 바친 사람은?',o:['허준','이원익','강홍립','영창대군'],e:'허준이 25권의 「동의보감」을 완성했고, 광해군이 전국에 널리 나눠 주게 했어요. (사료 2)'},
+{q:'대동법은 무엇을 기준으로 쌀을 거두는 제도일까요?',o:['토지 결수(땅의 크기)','집의 개수','가족의 수','특산물의 종류'],e:'집마다 거두던 공물 대신 땅의 크기를 기준으로 쌀을 거두었어요. 가난한 농민의 부담이 줄었어요. (사료 3)'},
+{q:'광해군이 명나라에 군사를 보낼 때 도원수로 삼은 사람은?',o:['강홍립','허준','이원익','임해군'],e:'강홍립을 도원수로 삼고, 상황에 맞게 유연하게 하라는 밀지를 내렸어요. (사료 4)'},
+{q:'영창대군을 제거하고 인목대비를 서쪽 궁궐에 가둔 일을 무엇이라 부를까요?',o:['폐모살제','호패법','방납의 폐단','중립 외교'],e:'‘폐모살제’는 어머니(인목대비)를 내치고 동생(영창대군)을 죽였다는 뜻으로, 비판받은 일이에요. (사료 5)'},
+{q:'1623년 광해군을 왕에서 쫓아낸 사건과, 그 일을 일으킨 세력은?',o:['인조반정 – 서인','인조반정 – 후금','중립 외교 – 서인','대동법 – 서인'],e:'성리학적 명분을 강조한 서인 세력이 인조를 왕으로 세운 인조반정이에요. (사료 5)'}];
+ 
+/* 상태 */
+let st='learn',order=[0,1,2,3,4],pos=0,open=false,mode='all',marks={},mb={},ev={EI:[],NS:[],TF:[],JP:[]},qz=null,lastWrong=[];
+const nMark=()=>Object.keys(marks).length;
+const deck=()=>mode==='more'?order.filter(i=>marks[i]==='more'):order;
+const lv=()=>document.querySelectorAll('.nothing');
+ 
+function head(){
+ const t={learn:['book','사료 탐험'],mbti:['help','광해군 MBTI 추리'],quiz:['star','퀴즈 도전'],review:['redo','틀린 문제 보기'],result:['star','결과']}[st];
+ $('ttl').innerHTML=ic(t[0],26)+' 광해군 '+t[1];
+ $('pb').style.width=(nMark()/5*100)+'%';
+ $('pt').textContent='사료 학습 '+nMark()+' / 5개';
+ const ok=Object.values(marks).filter(v=>v==='ok').length;
+ $('pt2').textContent='이해했어요 '+ok+'개';
+}
+function go(s){st=s;draw()}
+function draw(){head();({learn,mbti,quiz,review,result})[st]();window.scrollTo(0,0)}
+ 
+/* 1단계: 사료 카드 */
+function learn(){
+ const d=deck(),more=Object.values(marks).filter(v=>v==='more').length;
+ let h=`<div class="box"><div class="row" style="margin-top:0">
+ <button class="b pk" onclick="shuf()">${ic('shuffle')} 카드 섞기</button>
+ <button class="b ${mode==='more'?'gn':'gy'}" onclick="tog()">${ic('eye')} ${mode==='more'?'전체 보기':'더 볼래요만 보기 ('+more+')'}</button></div>`;
+ if(!d.length){
+  h+=`<p>‘더 볼래요’로 고른 카드가 아직 없어요. 전체 카드로 돌아가 볼까요?</p><button class="b" onclick="tog()">전체 보기</button></div>`;
+ }else{
+  if(pos>=d.length)pos=d.length-1;
+  const i=d[pos],s=S[i],m=marks[i];
+  h+=`<div class="hint" style="margin-bottom:6px">카드를 눌러 설명을 열고 닫아요 👇</div>
+  <div class="card" onclick="flip()">${m?`<span class="badge ${m}">${m==='ok'?'이해했어요':'더 볼래요'}</span>`:''}
+  <span class="tag">사료 ${i+1}</span>
+  ${open?`<h2 style="margin-top:8px">${s.e} ${s.t}</h2><ul>${s.pts.map(p=>'<li>'+p+'</li>').join('')}</ul><div class="gist">💡 ${s.gist}</div>`
+  :`<div class="em" style="margin-top:8px">${s.e}</div><h2>${s.t}</h2><p class="hint">${ic('eye',20)} 눌러서 설명 보기</p>`}</div>
+  <div class="row"><button class="b gn" onclick="mark('ok')">${ic('check')} 이해했어요</button><button class="b pk" onclick="mark('more')">${ic('eye')} 더 볼래요</button></div>
+  <div class="nav"><button class="b gy" onclick="mv(-1)" ${pos==0?'disabled':''}>${ic('left')} 이전</button><b>${pos+1} / ${d.length}</b><button class="b gy" onclick="mv(1)" ${pos>=d.length-1?'disabled':''}>다음 ${ic('right')}</button></div></div>`;
+ }
+ h+=`<div class="box"><button class="b" style="width:100%" onclick="go('mbti')" ${nMark()<5?'disabled':''}>${ic('help')} 광해군 MBTI 추리하러 가기</button>
+ ${nMark()<5?'<p class="hint" style="margin:6px 0 0">5개 사료에 모두 ‘이해했어요’나 ‘더 볼래요’를 누르면 열려요.</p>':''}</div>`;
+ $('app').innerHTML=h;
+}
+const flip=()=>{open=!open;draw()};
+const mv=n=>{pos+=n;open=false;draw()};
+const shuf=()=>{order=sh(order);pos=0;open=false;draw()};
+const tog=()=>{mode=mode==='more'?'all':'more';pos=0;open=false;draw()};
+function mark(v){
+ marks[deck()[pos]]=v;open=false;
+ const d=deck();
+ if(mode==='more'&&v==='ok'){ if(!d.length){pos=0}else if(pos>=d.length)pos=d.length-1 }
+ else if(pos<d.length-1)pos++;
+ draw();
+}
+ 
+/* 2단계: MBTI 추리 */
+function mbti(){
+ let h=`<div class="box"><h2>${ic('help')} 광해군의 MBTI는?</h2><p>사료를 읽고 광해군과 더 가까운 쪽을 고르세요. 그리고 ‘근거’가 된 사료를 눌러 표시해요. <b>정답은 없어요!</b> 사료로 이유를 말하는 게 중요해요.</p></div>`;
+ M.forEach(a=>{
+  const sel=mb[a.k],e=ev[a.k];
+  h+=`<div class="box"><h2>${MT[a.k]}</h2><div class="row">`;
+  [a.a,a.b].forEach(c=>{h+=`<button class="pick ${sel===c[0]?'on':''}" onclick="pk('${a.k}','${c[0]}')"><b>${c[0]} ${c[1]}</b><br><span class="hint">${c[2]}</span></button>`});
+  h+=`</div><div class="axis"><b>근거 사료 고르기</b><div class="row">`;
+  for(let i=0;i<5;i++)h+=`<button class="chip ${e.includes(i)?'on':''}" onclick="ce('${a.k}',${i})">사료 ${i+1}</button>`;
+  h+=`</div>`;
+  if(e.length)h+=e.sort().map(i=>`<div class="gist">${S[i].e} <b>사료 ${i+1}</b>: ${S[i].gist}</div>`).join('');
+  else h+=`<p class="hint">근거로 쓴 사료를 눌러 보세요.</p>`;
+  h+=`</div></div>`;
+ });
+ const done=M.every(a=>mb[a.k]);
+ h+=`<div class="box"><div class="big">${done?M.map(a=>mb[a.k]).join(''):'????'}</div><p style="text-align:center;margin:4px 0 10px">내가 추리한 광해군의 MBTI</p>
+ <div class="row"><button class="b gy" onclick="go('learn')">${ic('left')} 사료로 돌아가기</button><button class="b" onclick="startQ(Q)" ${done?'':'disabled'}>${ic('star')} 퀴즈 시작</button></div>
+ ${done?'':'<p class="hint" style="margin:0">4가지를 모두 고르면 퀴즈로 갈 수 있어요.</p>'}</div>`;
+ $('app').innerHTML=h;
+}
+const pk=(k,v)=>{mb[k]=v;draw()};
+const ce=(k,i)=>{const e=ev[k],j=e.indexOf(i);j<0?e.push(i):e.splice(j,1);const y=window.scrollY;draw();window.scrollTo(0,y)};
+ 
+/* 3단계: 퀴즈 */
+function startQ(list){
+ qz={list:sh(list),i:0,score:0,wrong:[],sel:null,opts:null,full:list===Q};
+ go('quiz');
+}
+function quiz(){
+ const c=qz.list[qz.i];
+ if(!qz.opts)qz.opts=sh(c.o);
+ const ans=qz.sel!==null;
+ let h=`<div class="box"><span class="tag">${qz.i+1} / ${qz.list.length} 번째 문제</span><h2 style="margin-top:8px">${c.q}</h2>`;
+ qz.opts.forEach((o,k)=>{
+  let cl='opt';
+  if(ans){if(o===c.o[0])cl+=' good';else if(k===qz.sel)cl+=' bad'}
+  h+=`<button class="b ${cl}" onclick="pick(${k})" ${ans?'disabled':''}>${ans&&o===c.o[0]?ic('check'):ans&&k===qz.sel?ic('x'):''} ${o}</button>`;
+ });
+ if(ans){
+  const r=qz.opts[qz.sel]===c.o[0];
+  h+=`<div class="fb"><b>${r?'⭕ 정답이에요!':'❌ 아쉬워요. 정답은 “'+c.o[0]+'”'}</b><br>${c.e}</div>
+  <button class="b" style="width:100%;margin-top:10px" onclick="nextQ()">${qz.i+1<qz.list.length?'다음 문제 '+ic('right'):'결과 보기 '+ic('star')}</button>`;
+ }
+ $('app').innerHTML=h+'</div>';
+}
+function pick(k){
+ if(qz.sel!==null)return;
+ qz.sel=k;const c=qz.list[qz.i];
+ qz.opts[k]===c.o[0]?qz.score++:qz.wrong.push(c);
+ draw();
+}
+function nextQ(){
+ if(qz.i+1<qz.list.length){qz.i++;qz.sel=null;qz.opts=null;draw()}
+ else{lastWrong=qz.wrong;go('result')}
+}
+function result(){
+ const n=qz.list.length,pt=Math.round(qz.score/n*100);
+ let t='🐣 다시 도전하는 병아리';
+ if(pt>=90)t='🏆 광해군 박사';else if(pt>=80)t='🧭 사료 탐험가';else if(pt>=50)t='🌱 새싹 역사가';
+ $('app').innerHTML=`<div class="box" style="text-align:center"><h2 style="justify-content:center">${ic('star')} 결과</h2>
+ <div class="sc">${qz.full?pt+'점':qz.score+' / '+n}</div><p>${n}문제 중 <b>${qz.score}개</b>를 맞혔어요.</p>
+ ${qz.full?`<div class="big" style="font-size:1.6rem;letter-spacing:0">${t}</div>`:''}
+ <div class="row"><button class="b pk" onclick="startQ(Q)">${ic('redo')} 다시 풀기</button>
+ <button class="b gn" onclick="go('review')" ${lastWrong.length?'':'disabled'}>${ic('eye')} 틀린 문제 보기 (${lastWrong.length})</button></div>
+ <button class="b gy" onclick="go('learn')">${ic('book')} 사료 다시 보기</button></div>`;
+}
+function review(){
+ let h=`<div class="box"><h2>${ic('redo')} 틀린 문제 모아 보기</h2>`;
+ if(!lastWrong.length)h+='<p>틀린 문제가 없어요. 대단해요! 🎉</p>';
+ lastWrong.forEach((c,i)=>{h+=`<div class="axis"><b>${i+1}. ${c.q}</b><div class="gist">정답: <b>${c.o[0]}</b><br>${c.e}</div></div>`});
+ h+=`<div class="row">${lastWrong.length?`<button class="b pk" onclick="startQ(lastWrong)">${ic('redo')} 틀린 문제만 다시 풀기</button>`:''}<button class="b gy" onclick="go('result')">${ic('left')} 결과로</button></div></div>`;
+ $('app').innerHTML=h;
+}
+draw();
+</script>
+</body>
+</html>
